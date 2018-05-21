@@ -4,26 +4,61 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.27004.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SCDSteamModLoader", "SCDSteamModLoader\SCDSteamModLoader.vcxproj", "{984CBC28-034B-4B42-8DC7-DBCD5449BE54}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EC0293F5-4BCF-46B2-8133-18CAEA141C5B} = {EC0293F5-4BCF-46B2-8133-18CAEA141C5B}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ModLoaderCommon", "mod-loader-common\ModLoaderCommon\ModLoaderCommon.vcxproj", "{EC0293F5-4BCF-46B2-8133-18CAEA141C5B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModManagerCommon", "mod-loader-common\ModManagerCommon\ModManagerCommon.csproj", "{4A480502-79B5-4E1E-8D67-16C514BB13CD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{B299A872-5522-4E7C-92AC-7AAAD543984F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCDSteamModManager", "SCDSteamModManager\SCDSteamModManager.csproj", "{8AEAEE58-4FCD-4B05-932C-356B33843C60}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
+		Debug|Any CPU = Debug|Any CPU
 		Debug|x86 = Debug|x86
-		Release|x64 = Release|x64
+		Release|Any CPU = Release|Any CPU
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{984CBC28-034B-4B42-8DC7-DBCD5449BE54}.Debug|x64.ActiveCfg = Debug|x64
-		{984CBC28-034B-4B42-8DC7-DBCD5449BE54}.Debug|x64.Build.0 = Debug|x64
+		{984CBC28-034B-4B42-8DC7-DBCD5449BE54}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{984CBC28-034B-4B42-8DC7-DBCD5449BE54}.Debug|x86.ActiveCfg = Debug|Win32
 		{984CBC28-034B-4B42-8DC7-DBCD5449BE54}.Debug|x86.Build.0 = Debug|Win32
-		{984CBC28-034B-4B42-8DC7-DBCD5449BE54}.Release|x64.ActiveCfg = Release|x64
-		{984CBC28-034B-4B42-8DC7-DBCD5449BE54}.Release|x64.Build.0 = Release|x64
+		{984CBC28-034B-4B42-8DC7-DBCD5449BE54}.Release|Any CPU.ActiveCfg = Release|Win32
 		{984CBC28-034B-4B42-8DC7-DBCD5449BE54}.Release|x86.ActiveCfg = Release|Win32
 		{984CBC28-034B-4B42-8DC7-DBCD5449BE54}.Release|x86.Build.0 = Release|Win32
+		{EC0293F5-4BCF-46B2-8133-18CAEA141C5B}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{EC0293F5-4BCF-46B2-8133-18CAEA141C5B}.Debug|x86.ActiveCfg = Debug|Win32
+		{EC0293F5-4BCF-46B2-8133-18CAEA141C5B}.Debug|x86.Build.0 = Debug|Win32
+		{EC0293F5-4BCF-46B2-8133-18CAEA141C5B}.Release|Any CPU.ActiveCfg = Release|Win32
+		{EC0293F5-4BCF-46B2-8133-18CAEA141C5B}.Release|x86.ActiveCfg = Release|Win32
+		{EC0293F5-4BCF-46B2-8133-18CAEA141C5B}.Release|x86.Build.0 = Release|Win32
+		{4A480502-79B5-4E1E-8D67-16C514BB13CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A480502-79B5-4E1E-8D67-16C514BB13CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A480502-79B5-4E1E-8D67-16C514BB13CD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4A480502-79B5-4E1E-8D67-16C514BB13CD}.Debug|x86.Build.0 = Debug|Any CPU
+		{4A480502-79B5-4E1E-8D67-16C514BB13CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A480502-79B5-4E1E-8D67-16C514BB13CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A480502-79B5-4E1E-8D67-16C514BB13CD}.Release|x86.ActiveCfg = Release|Any CPU
+		{4A480502-79B5-4E1E-8D67-16C514BB13CD}.Release|x86.Build.0 = Release|Any CPU
+		{8AEAEE58-4FCD-4B05-932C-356B33843C60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8AEAEE58-4FCD-4B05-932C-356B33843C60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8AEAEE58-4FCD-4B05-932C-356B33843C60}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8AEAEE58-4FCD-4B05-932C-356B33843C60}.Debug|x86.Build.0 = Debug|Any CPU
+		{8AEAEE58-4FCD-4B05-932C-356B33843C60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8AEAEE58-4FCD-4B05-932C-356B33843C60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8AEAEE58-4FCD-4B05-932C-356B33843C60}.Release|x86.ActiveCfg = Release|Any CPU
+		{8AEAEE58-4FCD-4B05-932C-356B33843C60}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{EC0293F5-4BCF-46B2-8133-18CAEA141C5B} = {B299A872-5522-4E7C-92AC-7AAAD543984F}
+		{4A480502-79B5-4E1E-8D67-16C514BB13CD} = {B299A872-5522-4E7C-92AC-7AAAD543984F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {441071DD-6E24-483A-9BDF-3AE1E4A1945F}
