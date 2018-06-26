@@ -24,34 +24,34 @@ FunctionPointer(char, OpenDataFile, (const char *a1, char *a2), (0x15C70 + baseA
 FunctionPointer(char, OpenDataFile2, (const char *a1), (0x175F0 + baseAddress));
 char OpenDataFile_r(const char *a1, char *a2)
 {
-    if (fileMap.getModIndex(a1) != 0)
+	if (fileMap.getModIndex(a1) != 0)
 	{
 		UseRSDKFile = 0;
 		a1 = fileMap.replaceFile(a1);
 	}
-    else
-    {
+	else
+	{
 		UseRSDKFile = packExists;
-        if (string(a1).find("\\") != -1)
-            UseRSDKFile = 0;
-    }
-    return OpenDataFile(a1, a2);
+		if (string(a1).find("\\") != -1)
+			UseRSDKFile = 0;
+	}
+	return OpenDataFile(a1, a2);
 }
 
 char OpenDataFile2_r(const char *a1)
 {
-    if (fileMap.getModIndex(a1) != 0)
-    {
-        UseRSDKFile = 0;
-        a1 = fileMap.replaceFile(a1);
-    }
-    else
-    {
-        UseRSDKFile = packExists;
-        if (string(a1).find("\\") != -1)
-            UseRSDKFile = 0;
-    }
-    return OpenDataFile2(a1);
+	if (fileMap.getModIndex(a1) != 0)
+	{
+		UseRSDKFile = 0;
+		a1 = fileMap.replaceFile(a1);
+	}
+	else
+	{
+		UseRSDKFile = packExists;
+		if (string(a1).find("\\") != -1)
+			UseRSDKFile = 0;
+	}
+	return OpenDataFile2(a1);
 }
 
 FunctionPointer(char, CheckRSDKFile, (const char *a1), (0x15BA0 + baseAddress));
@@ -111,8 +111,8 @@ char InitMods(const char *a1)
 	}
 	packExists = CheckRSDKFile(a1);
 	WriteJump((void*)(0x111D + baseAddress), OpenDataFile_r);
-    WriteJump((void*)(0x105A + baseAddress), OpenDataFile2_r);
-    return packExists;
+	WriteJump((void*)(0x105A + baseAddress), OpenDataFile2_r);
+	return packExists;
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule,
@@ -124,7 +124,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 	{
 	case DLL_PROCESS_ATTACH:
 		WriteJump((void*)(0x10FA + baseAddress), InitMods);
-        break;
+		break;
 	case DLL_PROCESS_DETACH:
 		break;
 	}
