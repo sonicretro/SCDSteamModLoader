@@ -32,7 +32,15 @@ namespace SCDSteamModManager
 		const string loaderdllpath = "mods/SCDSteamModLoader.dll";
 		LoaderInfo loaderini;
 		Dictionary<string, ModInfo> mods;
-		bool installed;
+        const string codelstpath = "mods/Codes.lst";
+        const string codexmlpath = "mods/Codes.xml";
+        const string codedatpath = "mods/Codes.dat";
+        const string patchdatpath = "mods/Patches.dat";
+        CodeList mainCodes;
+        List<Code> codes;
+
+        bool installed;
+        bool suppressEvent;
 
 		readonly ModUpdater modUpdater = new ModUpdater();
 		BackgroundWorker updateChecker;
@@ -78,7 +86,22 @@ namespace SCDSteamModManager
 			SetDoubleBuffered(modListView, true);
 			loaderini = File.Exists(loaderinipath) ? IniSerializer.Deserialize<LoaderInfo>(loaderinipath) : new LoaderInfo();
 
-			LoadModList();
+            try
+            {
+                if (File.Exists(codelstpath))
+                    mainCodes = CodeList.Load(codelstpath);
+                else if (File.Exists(codexmlpath))
+                    mainCodes = CodeList.Load(codexmlpath);
+                else
+                    mainCodes = new CodeList();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, $"Error loading code list: {ex.Message}", "Sonic CD Steam Mod Manager", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                mainCodes = new CodeList();
+            }
+
+            LoadModList();
 
 			checkUpdateStartup.Checked = loaderini.UpdateCheck;
 			checkUpdateModsStartup.Checked = loaderini.ModUpdateCheck;
@@ -241,7 +264,8 @@ namespace SCDSteamModManager
 			modDescription.Text = "Description: No mod selected.";
 			modListView.Items.Clear();
 			mods = new Dictionary<string, ModInfo>();
-			string modDir = Path.Combine(Environment.CurrentDirectory, "mods");
+            codes = new List<Code>(mainCodes.Codes);
+            string modDir = Path.Combine(Environment.CurrentDirectory, "mods");
 
 			foreach (string filename in ModInfo.GetModFiles(new DirectoryInfo(modDir)))
 			{
@@ -255,9 +279,13 @@ namespace SCDSteamModManager
 				if (mods.ContainsKey(mod))
 				{
 					ModInfo inf = mods[mod];
-					modListView.Items.Add(new ListViewItem(new[] { inf.Name, inf.Author, inf.Version }) { Checked = true, Tag = mod });
-				}
-				else
+                    suppressEvent = true;
+                    modListView.Items.Add(new ListViewItem(new[] { inf.Name, inf.Author, inf.Version }) { Checked = true, Tag = mod });
+                    suppressEvent = false;
+                    if (!string.IsNullOrEmpty(inf.Codes))
+                        codes.AddRange(CodeList.Load(Path.Combine(Path.Combine(modDir, mod), inf.Codes)).Codes);
+                }
+                else
 				{
 					MessageBox.Show(this, "Mod \"" + mod + "\" could not be found.\n\nThis mod will be removed from the list.",
 						Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -272,7 +300,19 @@ namespace SCDSteamModManager
 			}
 
 			modListView.EndUpdate();
-		}
+
+            loaderini.EnabledCodes = new List<string>(loaderini.EnabledCodes.Where(a => codes.Any(c => c.Name == a)));
+            foreach (Code item in codes.Where(a => a.Required && !loaderini.EnabledCodes.Contains(a.Name)))
+                loaderini.EnabledCodes.Add(item.Name);
+
+            codesCheckedListBox.BeginUpdate();
+            codesCheckedListBox.Items.Clear();
+
+            foreach (Code item in codes)
+                codesCheckedListBox.Items.Add(item.Name, loaderini.EnabledCodes.Contains(item.Name));
+
+            codesCheckedListBox.EndUpdate();
+        }
 
 		private bool CheckForUpdates(bool force = false)
 		{
@@ -768,9 +808,23 @@ namespace SCDSteamModManager
 			loaderini.UpdateFrequency = (int)numericUpdateFrequency.Value;
 
 			IniSerializer.Serialize(loaderini, loaderinipath);
-		}
 
-		private void saveAndPlayButton_Click(object sender, EventArgs e)
+            List<Code> selectedCodes = new List<Code>();
+            List<Code> selectedPatches = new List<Code>();
+
+            foreach (Code item in codesCheckedListBox.CheckedIndices.OfType<int>().Select(a => codes[a]))
+            {
+                if (item.Patch)
+                    selectedPatches.Add(item);
+                else
+                    selectedCodes.Add(item);
+            }
+
+            CodeList.WriteDatFile(patchdatpath, selectedPatches);
+            CodeList.WriteDatFile(codedatpath, selectedCodes);
+        }
+
+        private void saveAndPlayButton_Click(object sender, EventArgs e)
 		{
 			if (updateChecker?.IsBusy == true)
 			{
@@ -795,7 +849,7 @@ namespace SCDSteamModManager
 
 			Save();
 			Process process = Process.Start("soniccd.exe");
-			process?.WaitForInputIdle(10000);
+			//process?.WaitForInputIdle(10000);
 			Close();
 		}
 
@@ -834,7 +888,53 @@ namespace SCDSteamModManager
 			}
 		}
 
-		private void modListView_MouseClick(object sender, MouseEventArgs e)
+        private void codesCheckedListBox_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            Code code = codes[e.Index];
+            if (code.Required)
+                e.NewValue = CheckState.Checked;
+            if (e.NewValue == CheckState.Unchecked)
+            {
+                if (loaderini.EnabledCodes.Contains(code.Name))
+                    loaderini.EnabledCodes.Remove(code.Name);
+            }
+            else
+            {
+                if (!loaderini.EnabledCodes.Contains(code.Name))
+                    loaderini.EnabledCodes.Add(code.Name);
+            }
+        }
+
+        private void modListView_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            if (suppressEvent) return;
+            codes = new List<Code>(mainCodes.Codes);
+            string modDir = Path.Combine(Environment.CurrentDirectory, "mods");
+            List<string> modlist = new List<string>();
+            foreach (ListViewItem item in modListView.CheckedItems)
+                modlist.Add((string)item.Tag);
+            if (e.NewValue == CheckState.Unchecked)
+                modlist.Remove((string)modListView.Items[e.Index].Tag);
+            else
+                modlist.Add((string)modListView.Items[e.Index].Tag);
+            foreach (string mod in modlist)
+                if (mods.ContainsKey(mod))
+                {
+                    ModInfo inf = mods[mod];
+                    if (!string.IsNullOrEmpty(inf.Codes))
+                        codes.AddRange(CodeList.Load(Path.Combine(Path.Combine(modDir, mod), inf.Codes)).Codes);
+                }
+            loaderini.EnabledCodes = new List<string>(loaderini.EnabledCodes.Where(a => codes.Any(c => c.Name == a)));
+            foreach (Code item in codes.Where(a => a.Required && !loaderini.EnabledCodes.Contains(a.Name)))
+                loaderini.EnabledCodes.Add(item.Name);
+            codesCheckedListBox.BeginUpdate();
+            codesCheckedListBox.Items.Clear();
+            foreach (Code item in codes)
+                codesCheckedListBox.Items.Add(item.Name, loaderini.EnabledCodes.Contains(item.Name));
+            codesCheckedListBox.EndUpdate();
+        }
+
+        private void modListView_MouseClick(object sender, MouseEventArgs e)
 		{
 			if (e.Button != MouseButtons.Right)
 			{

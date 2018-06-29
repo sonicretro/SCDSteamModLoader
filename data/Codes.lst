@@ -1,0 +1,7 @@
+Code "Infinite Rings"
+ifeq8 007DDD3B 1
+	write32 00C3D6F0 999
+endif
+
+Code "Disable Timer"
+write8 00FC5810 0
