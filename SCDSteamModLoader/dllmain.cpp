@@ -56,6 +56,24 @@ char OpenDataFile2_r(const char *a1)
 	return OpenDataFile2(a1);
 }
 
+unordered_map<string, unsigned int> musicloops;
+FunctionPointer(int, sub_141B0, (int), (0x141B0 + baseAddress));
+int LoadSong(int musicID)
+{
+	int result = sub_141B0(musicID);
+	string namestr = (char*)(0x307D48 + baseAddress + (72 * musicID));
+	int &LoopSample = *(int*)(0x308A20 + baseAddress);
+	bool &LoopSong = *(bool*)(0x309A30 + baseAddress);
+	std::transform(namestr.begin(), namestr.end(), namestr.begin(), tolower);
+	auto iter = musicloops.find(namestr);
+	if (iter != musicloops.cend())
+	{
+		LoopSample = iter->second;
+		LoopSong = true;
+	}
+	return LoopSample;
+}
+
 // Code Parser.
 static CodeParser codeParser;
 
@@ -121,6 +139,19 @@ char InitMods(const char *a1)
 		const string modSysDirA = mod_dirA + "\\data";
 		if (DirectoryExists(modSysDirA))
 			fileMap.scanFolder(modSysDirA, i);
+
+		if (ini_mod->hasGroup("MusicLoops"))
+		{
+			const IniGroup *const gr = ini_mod->getGroup("MusicLoops");
+			for (auto iter = gr->cbegin(); iter != gr->cend(); ++iter)
+			{
+				string name = iter->first;
+				std::transform(name.begin(), name.end(), name.begin(), tolower);
+				name.append(".ogg");
+				musicloops[name] = std::stoi(iter->second);
+			}
+		}
+
 	}
 
 
@@ -192,6 +223,8 @@ char InitMods(const char *a1)
 	packExists = CheckRSDKFile(a1);
 	WriteJump((void*)(0x111D + baseAddress), OpenDataFile_r);
 	WriteJump((void*)(0x105A + baseAddress), OpenDataFile2_r);
+	// Music
+	WriteJump((void*)(0x1203 + baseAddress), LoadSong);
 	WriteCall((void*)(0x3F30 + baseAddress), ProcessCodes);
 	return packExists;
 }
