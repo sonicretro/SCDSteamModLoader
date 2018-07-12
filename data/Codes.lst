@@ -3,5 +3,82 @@ ifeq8 007DDD3B 1
 	write32 00C3D6F0 999
 endif
 
-Code "Disable Timer"
+Code "Infinite Lives"
+write8 00C0709C 99
+
+Code "Freeze Timer"
 write8 00FC5810 0
+
+Code "Enable Debug Mode"
+write8 00FC5844 1
+
+Code "Always Enable Mega CD Camera"
+write8 00FC5813 1
+
+Code "Always Enable Genesis Camera"
+write8 00FC5813 0
+
+Code "Always Play As Sonic"
+write8 00DA0828 0
+
+Code "Always Play As Tails"
+write8 00DA0828 1
+
+Code "Disable Time Travel"
+write8 00C070D4 0
+
+Code "Always Have Past Sign"
+write8 00C070D4 1
+
+Code "Always Have Future Sign"
+write8 00C070D4 2
+
+Code "All Time Stones Collected"
+write8 00C07144 127
+
+Code "All Generators Destroyed"
+write8 00C0711C 1
+
+Code "All Holograms Destroyed"
+write8 00C07120 1
+
+Code "Infinite Flight (Tails)"
+write8 00DA0724 0
+
+Code "Always Have Shield"
+write8 00C3D7AB 1
+write8 00C3D7A8 25
+
+Code "Always Have Invincibility"
+write8 00C3D7AB 1
+write8 00C3D7A8 26
+
+Code "Instant Time Travel"
+write8 00C070D8 180
+
+Code "Invincibility Lasts Forever"
+write16 00C3D700 999
+
+Code "Speed Shoes Last Forever"
+write16 00C3D6FC 999
+
+Code "Special Stage: Always Max Speed"
+write8 00DA0716 5
+
+Code "Special Stage: Always Double Max Speed"
+write8 00DA0716 10
+
+Code "Special Stage: Only Need One UFO"
+write8 00C3D800 1
+
+Code "Special Stage: Infinite Time"
+write16 00C3D804 999
+
+Code "Special Stage: Always Have Max Rings"
+write16 00C3D80C 999
+
+Code "Always JP Soundtrack"
+write8 00C07224 0
+
+Code "Always US Soundtrack"
+write8 00C07224 1
