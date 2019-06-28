@@ -6,7 +6,8 @@
 #include "IniFile.hpp"
 #include "FileMap.hpp"
 #include "FileSystem.h"
-#include "MemAccess.h"
+#include <MemAccess.h>
+#include "Trampoline.h"
 #include <fstream>
 #include "CodeParser.hpp"
 
@@ -22,56 +23,50 @@ char packExists;
 
 intptr_t baseAddress = (intptr_t)GetModuleHandle(nullptr);
 DataPointer(char, UseRSDKFile, (0x7E8D5C + baseAddress));
-FunctionPointer(char, OpenDataFile, (const char *a1, char *a2), (0x15C70 + baseAddress));
-FunctionPointer(char, OpenDataFile2, (const char *a1), (0x175F0 + baseAddress));
-char OpenDataFile_r(const char *a1, char *a2)
+FunctionPointer(char, OpenDataFile, (const char *filename, void *dataPtr), (0x15C70 + baseAddress));
+FunctionPointer(char, OpenDataFile2, (const char *filename), (0x175F0 + baseAddress));
+char OpenDataFile_r(const char *filename, void *dataPtr)
 {
-	if (fileMap.getModIndex(a1) != 0)
+	if (fileMap.getModIndex(filename) != 0)
 	{
 		UseRSDKFile = 0;
-		a1 = fileMap.replaceFile(a1);
+		filename = fileMap.replaceFile(filename);
 	}
 	else
 	{
 		UseRSDKFile = packExists;
-		if (string(a1).find("\\") != -1)
+		if (string(filename).find("\\") != -1)
 			UseRSDKFile = 0;
 	}
-	return OpenDataFile(a1, a2);
+	return OpenDataFile(filename, dataPtr);
 }
 
-char OpenDataFile2_r(const char *a1)
+char OpenDataFile2_r(const char *filename)
 {
-	if (fileMap.getModIndex(a1) != 0)
+	if (fileMap.getModIndex(filename) != 0)
 	{
 		UseRSDKFile = 0;
-		a1 = fileMap.replaceFile(a1);
+		filename = fileMap.replaceFile(filename);
 	}
 	else
 	{
 		UseRSDKFile = packExists;
-		if (string(a1).find("\\") != -1)
+		if (string(filename).find("\\") != -1)
 			UseRSDKFile = 0;
 	}
-	return OpenDataFile2(a1);
+	return OpenDataFile2(filename);
 }
 
 unordered_map<string, unsigned int> musicloops;
-FunctionPointer(int, sub_141B0, (int), (0x141B0 + baseAddress));
-int LoadSong(int musicID)
+Trampoline *musictramp;
+int __cdecl SetMusicTrack(const char *name, int slot, bool loop, unsigned int loopstart)
 {
-	int result = sub_141B0(musicID);
-	string namestr = (char*)(0x307D48 + baseAddress + (72 * musicID));
-	int &LoopSample = *(int*)(0x308A20 + baseAddress);
-	bool &LoopSong = *(bool*)(0x309A30 + baseAddress);
+	string namestr = name;
 	std::transform(namestr.begin(), namestr.end(), namestr.begin(), tolower);
 	auto iter = musicloops.find(namestr);
 	if (iter != musicloops.cend())
-	{
-		LoopSample = iter->second;
-		LoopSong = true;
-	}
-	return LoopSample;
+		loop == (loopstart = iter->second) != 0;
+	return ((decltype(SetMusicTrack)*)musictramp->Target())(name, slot, loop, loopstart);
 }
 
 // Code Parser.
@@ -80,7 +75,6 @@ static CodeParser codeParser;
 FunctionPointer(int, MainGameLoop, (), (0x187F + baseAddress));
 static int __cdecl ProcessCodes()
 {
-
 	codeParser.processCodeList();
 	return MainGameLoop();
 }
@@ -150,6 +144,11 @@ char InitMods(const char *a1)
 				name.append(".ogg");
 				musicloops[name] = std::stoi(iter->second);
 			}
+		}
+		if (ini_mod->getBool("", "TxtScripts", false))
+		{
+			// Prevents the game from using bytecode in favour of compiling the users code
+			WriteData((BYTE*)(0x15C52 + baseAddress), (BYTE)FALSE);
 		}
 
 	}
@@ -223,9 +222,8 @@ char InitMods(const char *a1)
 	packExists = CheckRSDKFile(a1);
 	WriteJump((void*)(0x111D + baseAddress), OpenDataFile_r);
 	WriteJump((void*)(0x105A + baseAddress), OpenDataFile2_r);
-	// Music
-	WriteJump((void*)(0x1203 + baseAddress), LoadSong);
 	WriteCall((void*)(0x3F30 + baseAddress), ProcessCodes);
+	musictramp = new Trampoline((baseAddress + 0x14070), (baseAddress + 0x14078), SetMusicTrack);
 	return packExists;
 }
 
