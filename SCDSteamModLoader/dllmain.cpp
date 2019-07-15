@@ -65,7 +65,7 @@ int __cdecl SetMusicTrack(const char *name, int slot, bool loop, unsigned int lo
 	std::transform(namestr.begin(), namestr.end(), namestr.begin(), tolower);
 	auto iter = musicloops.find(namestr);
 	if (iter != musicloops.cend())
-		loop == (loopstart = iter->second) != 0;
+		loop = (loopstart = iter->second) != 0;
 	return ((decltype(SetMusicTrack)*)musictramp->Target())(name, slot, loop, loopstart);
 }
 
