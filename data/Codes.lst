@@ -53,9 +53,45 @@ Code "Always Have Invincibility"
 write8 00C3D7AB 1
 write8 00C3D7A8 26
 
-Code "Instant Time Travel"
-write8 00C070D8 180
+Code "Boss Time Zone Fix"
+ifeq8 007DDD3B 1
+	ifeq8 00C07144 127
+		ifeq8 F9F294 9
+			write32 F9F294 8
+		endif
+		ifeq8 F9F294 19
+			write32 F9F294 18
+		endif
+		ifeq8 F9F294 29
+			write32 F9F294 28
+		endif
+		ifeq8 F9F294 39
+			write32 F9F294 38
+		endif
+		ifeq8 F9F294 49
+			write32 F9F294 48
+		endif
+		ifeq8 F9F294 59
+			write32 F9F294 58
+		endif
+		ifeq8 F9F294 69
+			write32 F9F294 68
+		endif
+	endif
+endif
 
+Code "Time Warp Fix"
+ifeq8 007DDD3B 1
+	write8 00C5D12C 170
+	ifeq8 C070D8 180
+		write32 DA0706 24000
+	endif
+endif
+
+Code "Instant Time Travel"
+ifeq8 007DDD3B 1
+	write8 00C5D12C 2
+endif
 Code "Invincibility Lasts Forever"
 write16 00C3D700 999
 
