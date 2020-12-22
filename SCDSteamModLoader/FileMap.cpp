@@ -105,9 +105,9 @@ void FileMap::addReplaceFile(const std::string &origFile, const std::string &mod
  * @param srcPath Path to scan.
  * @param modIdx Index of the current mod.
  */
-void FileMap::scanFolder(const string &srcPath, int modIdx)
+void FileMap::scanFolder(const string &srcPath, int modIdx, int folder)
 {
-	scanFolder_int(srcPath, srcPath.length() + 1, modIdx);
+	scanFolder_int(srcPath, srcPath.length() + 1, modIdx, folder);
 }
 
 /**
@@ -118,7 +118,7 @@ void FileMap::scanFolder(const string &srcPath, int modIdx)
  * @param srcLen Length of original srcPath. (used for recursion)
  * @param modIdx Index of the current mod.
  */
-void FileMap::scanFolder_int(const string &srcPath, int srcLen, int modIdx)
+void FileMap::scanFolder_int(const string &srcPath, int srcLen, int modIdx, int folder)
 {
 	WIN32_FIND_DATAA data;
 	char path[MAX_PATH];
@@ -145,7 +145,7 @@ void FileMap::scanFolder_int(const string &srcPath, int srcLen, int modIdx)
 		{
 			// Recursively scan this directory.
 			const string newSrcPath = srcPath + '\\' + string(data.cFileName);
-			scanFolder_int(newSrcPath, srcLen, modIdx);
+			scanFolder_int(newSrcPath, srcLen, modIdx, folder);
 		}
 		else
 		{
@@ -154,7 +154,29 @@ void FileMap::scanFolder_int(const string &srcPath, int srcLen, int modIdx)
 			transform(modFile.begin(), modFile.end(), modFile.begin(), ::tolower);
 
 			// Original filename.
-			string origFile = "data\\" + modFile.substr(srcLen);
+			string origFile = "";
+			switch (folder) {
+			default:
+			case 0:
+				origFile = "data\\" + modFile.substr(srcLen);
+				break;
+			case 1:
+				origFile = "images\\" + modFile.substr(srcLen);
+				break;
+			case 2:
+				origFile = "help\\" + modFile.substr(srcLen);
+				break;
+			case 3:
+				origFile = "sounds\\" + modFile.substr(srcLen);
+				break;
+			case 4:
+				origFile = modFile.substr(srcLen);
+				break;
+			case 5:
+				origFile = "videos\\" + modFile.substr(srcLen);
+				break;
+			}
+
 
 			setReplaceFile(origFile, modFile, modIdx);
 		}
