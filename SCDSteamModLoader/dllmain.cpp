@@ -23,30 +23,50 @@ char packExists;
 
 intptr_t baseAddress = (intptr_t)GetModuleHandle(nullptr);
 DataPointer(char, UseRSDKFile, (0x7E8D5C + baseAddress));
-FunctionPointer(char, OpenDataFile, (const char *filename, void *dataPtr), (0x15C70 + baseAddress));
-FunctionPointer(char, OpenDataFile2, (const char *filename), (0x175F0 + baseAddress));
-char OpenDataFile_r(const char *filename, void *dataPtr)
+FunctionPointer(char, OpenDataFile, (const char *filename, void *fileInfo), (0x15C70 + baseAddress));
+FunctionPointer(char, SetFileInfo, (const char *filename), (0x175F0 + baseAddress));
+
+
+DataPointer(void*, ImageARC, (0x2B7988 + baseAddress));
+DataPointer(void*, SfxARC, (0x2B7834 + baseAddress));
+DataPointer(void*, FontARC, (0x2B7838 + baseAddress));
+FunctionPointer(void*, LoadARCImage, (const char* filename), (0xBE90 + baseAddress));
+FunctionPointer(void*, LoadARCSFX, (const char* filename), (0x6420 + baseAddress));
+
+static int loc_LoadARCFont = baseAddress + 0xBE90;
+static __declspec(naked) void* LoadARCFont(void* a1, double a2, const char* filename)
 {
-	if (fileMap.getModIndex(filename) != 0)
+	__asm
 	{
-		UseRSDKFile = 0;
-		filename = fileMap.replaceFile(filename);
+		mov ecx, [ESP + 4]
+		fld [ESP + 8]
+		push[ESP + 16]
+		call loc_LoadARCFont
+		add ESP, 4
+		ret
 	}
-	else
-	{
-		UseRSDKFile = packExists;
-		if (string(filename).find("\\") != -1)
-			UseRSDKFile = 0;
-	}
-	return OpenDataFile(filename, dataPtr);
 }
 
-char OpenDataFile2_r(const char *filename)
+
+inline bool ends_with(std::string const& value, std::string const& ending)
+{
+	if (ending.size() > value.size()) return false;
+	return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
+}
+
+char OpenDataFile_r(const char *filename, void * fileInfo)
 {
 	if (fileMap.getModIndex(filename) != 0)
 	{
 		UseRSDKFile = 0;
 		filename = fileMap.replaceFile(filename);
+	}
+	else if (string(filename).rfind("Data/Scripts/", 0) == 0 && ends_with(string(filename), "txt")) {
+		//is a script, since those dont exist normally, load them from "scripts/"
+		UseRSDKFile = 0;
+		string fStr = string(filename);
+		fStr.erase(fStr.begin(), fStr.begin() + 5); //remove "Data/"
+		return OpenDataFile(fStr.c_str(), fileInfo);
 	}
 	else
 	{
@@ -54,7 +74,75 @@ char OpenDataFile2_r(const char *filename)
 		if (string(filename).find("\\") != -1)
 			UseRSDKFile = 0;
 	}
-	return OpenDataFile2(filename);
+	return OpenDataFile(filename, fileInfo);
+}
+
+char SetFileInfo_r(const char *filename)
+{
+	if (fileMap.getModIndex(filename) != 0)
+	{
+		UseRSDKFile = 0;
+		filename = fileMap.replaceFile(filename);
+	}
+	else if (string(filename).rfind("Data/Scripts/") == 0 && ends_with(string(filename), "txt")) {
+		//is a script, since those dont exist normally, load them from "scripts/"
+		UseRSDKFile = 0;
+		string fStr = string(filename);
+		fStr.erase(fStr.begin(), fStr.begin() + 5); //remove "Data/"
+		return SetFileInfo(fStr.c_str());
+	}
+	else
+	{
+		UseRSDKFile = packExists;
+		if (string(filename).find("\\") != -1)
+			UseRSDKFile = 0;
+	}
+	return SetFileInfo(filename);
+}
+
+void* LoadARCImage_r(const char* filename)
+{
+	if (fileMap.getModIndex(filename) != 0)
+	{
+		filename = fileMap.replaceFile(filename);
+		void* ptr = ImageARC;
+		ImageARC = NULL;
+		void* result = LoadARCImage(filename);
+		ImageARC = ptr;
+		return result;
+	}
+
+	return LoadARCImage(filename);
+}
+
+void* LoadARCSfx_r(const char* filename)
+{
+	if (fileMap.getModIndex(filename) != 0)
+	{
+		filename = fileMap.replaceFile(filename);
+		void* ptr = SfxARC;
+		SfxARC = NULL;
+		void* result = LoadARCSFX(filename);
+		SfxARC = ptr;
+		return result;
+	}
+
+	return LoadARCSFX(filename);
+}
+
+void* LoadARCFont_r(void* a1, double a2, const char* filename)
+{
+	if (fileMap.getModIndex(filename) != 0)
+	{
+		filename = fileMap.replaceFile(filename);
+		void* ptr = FontARC;
+		FontARC = NULL;
+		void* result = LoadARCFont(a1, a2, filename);
+		FontARC = ptr;
+		return result;
+	}
+
+	return LoadARCFont(a1, a2, filename);
 }
 
 unordered_map<string, unsigned int> musicloops;
@@ -130,9 +218,30 @@ char InitMods(const char *a1)
 		const string mod_nameA = modinfo->getString("Name");
 
 		// Check for Data replacements.
-		const string modSysDirA = mod_dirA + "\\data";
+		string modSysDirA = mod_dirA + "\\data";
 		if (DirectoryExists(modSysDirA))
-			fileMap.scanFolder(modSysDirA, i);
+			fileMap.scanFolder(modSysDirA, i, 0);
+
+		//PC port rubbish that should be supported
+		modSysDirA = mod_dirA + "\\images";
+		if (DirectoryExists(modSysDirA))
+			fileMap.scanFolder(modSysDirA, i, 1);
+
+		modSysDirA = mod_dirA + "\\help";
+		if (DirectoryExists(modSysDirA))
+			fileMap.scanFolder(modSysDirA, i, 2);
+
+		modSysDirA = mod_dirA + "\\sounds";
+		if (DirectoryExists(modSysDirA))
+			fileMap.scanFolder(modSysDirA, i, 3);
+
+		modSysDirA = mod_dirA + "\\fonts";
+		if (DirectoryExists(modSysDirA))
+			fileMap.scanFolder(modSysDirA, i, 4);
+
+		modSysDirA = mod_dirA + "\\videos";
+		if (DirectoryExists(modSysDirA))
+			fileMap.scanFolder(modSysDirA, i, 5);
 
 		if (ini_mod->hasGroup("MusicLoops"))
 		{
@@ -152,7 +261,6 @@ char InitMods(const char *a1)
 		}
 
 	}
-
 
 	// Check for patches.
 	ifstream patches_str("mods\\Patches.dat", ifstream::binary);
@@ -221,7 +329,10 @@ char InitMods(const char *a1)
 
 	packExists = CheckRSDKFile(a1);
 	WriteJump((void*)(0x111D + baseAddress), OpenDataFile_r);
-	WriteJump((void*)(0x105A + baseAddress), OpenDataFile2_r);
+	WriteJump((void*)(0x105A + baseAddress), SetFileInfo_r);
+	WriteJump((void*)(0x113B + baseAddress), LoadARCImage_r);
+	WriteJump((void*)(0x1672 + baseAddress), LoadARCSfx_r);
+	//WriteJump((void*)(0x1D2A + baseAddress), LoadARCFont_r); //Unimplimented due to issues calling it (__userpurge)
 	WriteCall((void*)(0x3F30 + baseAddress), ProcessCodes);
 	musictramp = new Trampoline((baseAddress + 0x14070), (baseAddress + 0x14078), SetMusicTrack);
 	return packExists;

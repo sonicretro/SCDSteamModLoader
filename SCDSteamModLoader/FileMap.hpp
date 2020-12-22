@@ -54,8 +54,9 @@ class FileMap
 		 * Destination is always relative to system/.
 		 * @param srcPath Path to scan.
 		 * @param modIdx Index of the current mod.
+		 * @param folder id to scan.
 		 */
-		void scanFolder(const std::string &srcPath, int modIdx);
+		void scanFolder(const std::string &srcPath, int modIdx, int folder);
 
 	protected:
 		/**
@@ -65,8 +66,9 @@ class FileMap
 		 * @param srcPath Path to scan.
 		 * @param srcLen Length of original srcPath. (used for recursion)
 		 * @param modIdx Index of the current mod.
+		 * @param folder id to scan.
 		 */
-		void scanFolder_int(const std::string &srcPath, int srcLen, int modIdx);
+		void scanFolder_int(const std::string &srcPath, int srcLen, int modIdx, int folder);
 
 		/**
 		 * Set a replacement file in the map.
