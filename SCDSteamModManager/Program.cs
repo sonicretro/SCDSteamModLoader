@@ -31,11 +31,9 @@ namespace SCDSteamModManager
 				Octokit.GitHubClient client = new Octokit.GitHubClient(new Octokit.ProductHeaderValue("SonicCDScripts"));
 				var releases = await client.Repository.Release.GetAll("Rubberduckycooly", "Sonic-CD-2011-Script-Decompilation");
 				var latest = releases[0];
+				var latestAsset = latest.Assets[0];
 
-				var assets = await client.Repository.Release.GetAllAssets("Rubberduckycooly", "Sonic-CD-2011-Script-Decompilation", latest.Id);
-				var latestAsset = assets[0];
-
-				string ver = "9999999999.9999999.9999999";
+				string ver = "none";
 				if (File.Exists("cdscrver.txt"))
 					ver = File.ReadAllText("cdscrver.txt");
 
@@ -47,7 +45,7 @@ namespace SCDSteamModManager
 
 					using (var webclient = new WebClient())
 					{
-						webclient.Headers.Add("user-agent", "Anything");
+						webclient.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
 						webclient.DownloadFile(
 							latestAsset.BrowserDownloadUrl,
 							"cdscr.zip");
