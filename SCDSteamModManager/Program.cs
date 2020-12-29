@@ -39,7 +39,7 @@ namespace SCDSteamModManager
 				if (File.Exists("cdscrver.txt"))
 					ver = File.ReadAllText("cdscrver.txt");
 
-				if (ver != latest.TagName)
+				if ((ver != latest.TagName || !Directory.Exists("Scripts/")) && ver != "dev")
 				{
 					//Clone & download scripts
 					if (Directory.Exists("Scripts/"))
@@ -85,11 +85,16 @@ namespace SCDSteamModManager
 			}
 		}
 
+		static async Task MainAsync()
+		{
+			await CheckGetScrUpdates();
+		}
+
 		/// <summary>
 		/// The main entry point for the application.
 		/// </summary>
 		[STAThread]
-		static async Task Main(string[] args)
+		static void Main(string[] args)
 		{
 			if (args.Length > 0 && args[0] == "urlhandler")
 			{
@@ -167,7 +172,8 @@ namespace SCDSteamModManager
 				return;
 			}
 
-			await CheckGetScrUpdates();
+			//TODO: inform the user that its downloading scripts (probably)
+			MainAsync().GetAwaiter().GetResult();
 
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
