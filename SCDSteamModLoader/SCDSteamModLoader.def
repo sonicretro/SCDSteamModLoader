@@ -1,0 +1,3 @@
+LIBRARY SCDSteamModLoader
+EXPORTS
+	Direct3DCreate9

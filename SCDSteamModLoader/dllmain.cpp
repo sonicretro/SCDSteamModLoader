@@ -10,6 +10,7 @@
 #include "Trampoline.h"
 #include <fstream>
 #include "CodeParser.hpp"
+#include "Direct3DHook.h"
 
 using std::ifstream;
 using std::string;
@@ -170,6 +171,7 @@ static int __cdecl ProcessCodes()
 FunctionPointer(char, CheckRSDKFile, (const char *a1), (0x15BA0 + baseAddress));
 char InitMods(const char *a1)
 {
+	HookDirect3D();
 	FILE *f_ini = _wfopen(L"mods\\SCDSteamModLoader.ini", L"r");
 	if (!f_ini)
 	{

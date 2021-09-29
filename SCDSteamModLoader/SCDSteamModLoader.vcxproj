@@ -64,6 +64,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>..\bin\ModLoaderCommon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>SCDSteamModLoader.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -84,9 +85,11 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalDependencies>..\bin\ModLoaderCommon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>SCDSteamModLoader.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Direct3DHook.h" />
     <ClInclude Include="FileMap.hpp" />
     <ClInclude Include="MemAccess.h" />
     <ClInclude Include="stdafx.h" />
@@ -96,12 +99,15 @@
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="FileMap.cpp" />
-    <ClCompile Include="SCDSteamModLoader.cpp" />
+    <ClCompile Include="Direct3DHook.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Trampoline.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SCDSteamModLoader.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

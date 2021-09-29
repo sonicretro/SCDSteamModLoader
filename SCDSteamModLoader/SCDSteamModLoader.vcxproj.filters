@@ -30,12 +30,15 @@
     <ClInclude Include="Trampoline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Direct3DHook.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SCDSteamModLoader.cpp">
+    <ClCompile Include="Direct3DHook.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dllmain.cpp">
@@ -47,5 +50,10 @@
     <ClCompile Include="Trampoline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SCDSteamModLoader.def">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
