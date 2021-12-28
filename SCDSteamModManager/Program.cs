@@ -70,6 +70,12 @@ namespace SCDSteamModManager
 						if (File.Exists("cdscr.zip"))
 							File.Delete("cdscr.zip");
 
+						if (Directory.Exists("Sonic-CD-2011-Script-Decompilation-main"))
+						{
+							Directory.Move("Sonic-CD-2011-Script-Decompilation-main\\Scripts", "Scripts");
+							Directory.Delete("Sonic-CD-2011-Script-Decompilation-main", true);
+						}
+
 						File.WriteAllText("cdscrver.txt", latest.Sha);
 					}
 				}
