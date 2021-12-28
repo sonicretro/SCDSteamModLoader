@@ -29,15 +29,14 @@ namespace SCDSteamModManager
 			try
 			{
 				Octokit.GitHubClient client = new Octokit.GitHubClient(new Octokit.ProductHeaderValue("SonicCDScripts"));
-				var releases = await client.Repository.Release.GetAll("Rubberduckycooly", "Sonic-CD-2011-Script-Decompilation");
+				var releases = await client.Repository.Commit.GetAll("Rubberduckycooly", "Sonic-CD-2011-Script-Decompilation");
 				var latest = releases[0];
-				var latestAsset = latest.Assets[0];
 
 				string ver = "none";
 				if (File.Exists("cdscrver.txt"))
 					ver = File.ReadAllText("cdscrver.txt");
 
-				if ((ver != latest.TagName || !Directory.Exists("Scripts/")) && ver != "dev")
+				if ((ver != latest.Sha || !Directory.Exists("Scripts/")) && ver != "dev")
 				{
 					//Clone & download scripts
 					if (Directory.Exists("Scripts/"))
@@ -47,7 +46,7 @@ namespace SCDSteamModManager
 					{
 						webclient.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
 						webclient.DownloadFile(
-							latestAsset.BrowserDownloadUrl,
+							"https://github.com/Rubberduckycooly/Sonic-CD-2011-Script-Decompilation/archive/refs/heads/main.zip",
 							"cdscr.zip");
 
 						Process process = Process.Start(
@@ -71,7 +70,7 @@ namespace SCDSteamModManager
 						if (File.Exists("cdscr.zip"))
 							File.Delete("cdscr.zip");
 
-						File.WriteAllText("cdscrver.txt", latest.TagName);
+						File.WriteAllText("cdscrver.txt", latest.Sha);
 					}
 				}
 			}
