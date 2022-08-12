@@ -176,7 +176,7 @@ namespace SCDSteamModManager
 			}
 
 			//TODO: inform the user that its downloading scripts (probably)
-			MainAsync().GetAwaiter().GetResult();
+			//MainAsync().GetAwaiter().GetResult();
 
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
